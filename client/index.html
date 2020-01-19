@@ -18,6 +18,16 @@
         .head input {
             width: 300px;
         }
+
+        .delBtn {
+            padding-left: 14px;
+            color: lightgray;
+            cursor: pointer;
+        }
+
+        .delBtn:hover {
+            color: black;
+        }
     </style>
 
 </head>
@@ -25,6 +35,8 @@
 
 <body>
     <!-- Define main structure of webpage -->
+    <h3>Sentimenter</h3>
+    <p>Please enter a sentence:</p>
     <div class="head">
         <input type="text" id="inputText">
     </div>
@@ -37,7 +49,7 @@
 
     <!-- End of main structure part -->
 
-    
+
     <script>
 
         // all sentences and sentiments
@@ -64,22 +76,22 @@
                     "Content-type": "application/json; charset=UTF-8"
                 }
             })
-            
+
             // if Promise is fullfilled (aka: server response is back) then... 
             server_query.then(a => {
-                    
-                    a.sentences.forEach((element,eid) => {
-                        // convert data into a single positive/negative number
-                        const sent = a.sentiments[eid];
-                        const sval = sent.label==='POSITIVE'?sent.score:-sent.score;
-                        // and add to allSentences
-                        allSentences.push({ sentence: element, sentiment: sval})
-                    });
 
-                    // update Vis with updated allSentences
-                    updateVis();
-
+                a.sentences.forEach((element, eid) => {
+                    // convert data into a single positive/negative number
+                    const sent = a.sentiments[eid];
+                    const sval = sent.label === 'POSITIVE' ? sent.score : -sent.score;
+                    // and add to allSentences
+                    allSentences.push({ sentence: element, sentiment: sval })
                 });
+
+                // update Vis with updated allSentences
+                updateVis();
+
+            });
 
 
 
@@ -97,7 +109,7 @@
             const allRows = resDom.selectAll('.row').data(allSentences)
                 .join('tr')
                 .attr('class', 'row')
-                .html(x => `<td>${x.sentence}</td><td><svg width=100 height=15><rect class="bar"></svg></td>`)
+                .html(x => `<td>${x.sentence}</td><td><svg width=100 height=15><rect class="bar"></svg></td><td class='delBtn'>X</td>`)
 
 
             // use a simple scale function -- can be replace by d3.scale later
@@ -112,12 +124,20 @@
                 // left pos
                 .attr('y', 1)
                 // width (minimal width .1 )
-                .attr('width', d => { return Math.max(.1,Math.abs(scale(d.sentiment))) })
+                .attr('width', d => { return Math.max(.1, Math.abs(scale(d.sentiment))) })
                 // height
                 .attr('height', 13)
                 // fill color dependend on sign
                 .style('fill', d => d.sentiment >= 0 ? '#aaaacc' : '#ccaaaa')
 
+            // bind action to delete Button
+            allRows.select('.delBtn')
+                .on('click', (d, i) => {
+                    // remove item
+                    allSentences.splice(i, 1);
+                    // and update vis
+                    updateVis();
+                })
 
         }
 
