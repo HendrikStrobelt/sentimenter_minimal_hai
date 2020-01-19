@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <title>Sentimenter</title>
+    <style>
+        /* simple styles */
+        body {
+            /* background-color: #aaaaaa; */
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .head input {
+            width: 300px;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <!-- Define main structure of webpage -->
+    <div class="head">
+        <input type="text" id="inputText">
+    </div>
+    <div style="padding: 10px;">
+        <table id="results">
+
+        </table>
+
+    </div>
+
+    <!-- End of main structure part -->
+
+    
+    <script>
+
+        // all sentences and sentiments
+        const allSentences = [];
+
+        // select input field.. 
+        const myInput = d3.select("#inputText");
+        // .. and act when change of content:
+        myInput.on('change', () => {
+            // get input content and bind to var
+            const input_sentence = myInput.property('value');
+            console.log(input_sentence);
+            // and reset input field
+            myInput.property('value', '');
+
+            // send everything over to the python side using the REST server
+            // and return a JS Promise
+            const server_query = d3.json('../api/sentiment', {
+                method: "POST",
+                body: JSON.stringify({
+                    sentences: [input_sentence]
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            
+            // if Promise is fullfilled (aka: server response is back) then... 
+            server_query.then(a => {
+                    
+                    a.sentences.forEach((element,eid) => {
+                        // convert data into a single positive/negative number
+                        const sent = a.sentiments[eid];
+                        const sval = sent.label==='POSITIVE'?sent.score:-sent.score;
+                        // and add to allSentences
+                        allSentences.push({ sentence: element, sentiment: sval})
+                    });
+
+                    // update Vis with updated allSentences
+                    updateVis();
+
+                });
+
+
+
+
+        })
+
+        function updateVis() {
+
+            // select result table
+            const resDom = d3.select('#results');
+
+            // synchronize all Elements of allSentence with DOM table rows (tr) 
+            // of class `.row` and generate new two new table data (td) fields
+            // containing the sentence and an SVG element for the bar chart
+            const allRows = resDom.selectAll('.row').data(allSentences)
+                .join('tr')
+                .attr('class', 'row')
+                .html(x => `<td>${x.sentence}</td><td><svg width=100 height=15><rect class="bar"></svg></td>`)
+
+
+            // use a simple scale function -- can be replace by d3.scale later
+            const scale = x => { return x * 50 }
+
+            // update the bar in the bar chart. 
+            // rectangles have to drawn from left to right
+            // no negative width
+            allRows.select('.bar')
+                // top pos
+                .attr('x', d => d.sentiment >= 0 ? 50 : 50 + scale(d.sentiment))
+                // left pos
+                .attr('y', 1)
+                // width (minimal width .1 )
+                .attr('width', d => { return Math.max(.1,Math.abs(scale(d.sentiment))) })
+                // height
+                .attr('height', 13)
+                // fill color dependend on sign
+                .style('fill', d => d.sentiment >= 0 ? '#aaaacc' : '#ccaaaa')
+
+
+        }
+
+
+    </script>
+
+
+
+
+
+</body>
+
+</html>
