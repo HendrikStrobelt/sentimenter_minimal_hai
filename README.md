@@ -3,7 +3,7 @@
 Just a quick connection of the huggingface pipeline for sentiment analysis (see [here](https://github.com/huggingface/transformers#quick-tour-of-pipelines)) with a 
 small visual interface made with [D3js](https://d3js.org/).
 
-by [Hendrik Strobelt](http://hendrik.strobelt.com) (MIT-IBM Watson AI Lab)
+by [Hendrik Strobelt](http://hendrik.strobelt.com) ([MIT-IBM Watson AI Lab](https://mitibmwatsonailab.mit.edu/))
 
 <div style="text-align:center"><img src="sentimenter.gif" width=400/></div>
 
