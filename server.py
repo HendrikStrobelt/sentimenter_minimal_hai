@@ -5,7 +5,7 @@ import os
 from flask import Flask as Flask, send_from_directory, request, Response, redirect, url_for
 #### only needed for cross-origin requests:
 # from flask_cors import CORS
-from transformers import pipeline 
+from transformers import pipeline
 
 __author__ = 'Hendrik Strobelt'
 
@@ -21,17 +21,17 @@ nlp = pipeline('sentiment-analysis')
 def hello_world():
     return redirect('client/index.html')
 
-# functional backend taking sentences as request and returning 
+# functional backend taking sentences as request and returning
 # sentiment direction and score as JSON result
 @app.route('/api/sentiment', methods=['POST'])
 def sentiment():
     sentences = request.json['sentences']
-    
+
     results = [nlp(x) for x in sentences]
-    
+
     # need to convert from numpy float to regular float for JSON later
-    for res in results[0]:
-        res["score"]= res["score"].astype(float)
+    # for res in results[0]:
+    #     res["score"]= res["score"].astype(float)
 
     # return object with request (sentences) and result (sentiments)
     return json.dumps({
@@ -54,7 +54,7 @@ def get_data():
     json_res = json.dumps(res)
     return Response(json_res, mimetype='application/json')
 
-# send everything from client as static content 
+# send everything from client as static content
 @app.route('/client/<path:path>')
 def send_static(path):
     """ serves all files from ./client/ to ``/client/<path:path>``
