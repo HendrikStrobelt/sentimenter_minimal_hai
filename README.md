@@ -20,8 +20,9 @@ install flask:
 conda install -c anaconda flask
 ```
 
-install huggingface:
+install huggingface (and pytorch):
 ```
+conda install pytorch -c pytorch
 pip install transformers
 ```
 
