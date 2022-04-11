@@ -28,6 +28,15 @@
         .delBtn:hover {
             color: black;
         }
+
+        .bg_bar{
+            fill:none;
+            stroke: #ccc;
+            stroke-width: 1;
+        }
+        td {
+            padding: 5px 15px;
+        }
     </style>
 
 </head>
@@ -55,7 +64,7 @@
         // all sentences and sentiments
         const allSentences = [];
 
-        // select input field.. 
+        // select input field..
         const myInput = d3.select("#inputText");
         // .. and act when change of content:
         myInput.on('change', () => {
@@ -77,7 +86,7 @@
                 }
             })
 
-            // if Promise is fullfilled (aka: server response is back) then... 
+            // if Promise is fullfilled (aka: server response is back) then...
             server_query.then(a => {
 
                 a.sentences.forEach((element, eid) => {
@@ -103,19 +112,24 @@
             // select result table
             const resDom = d3.select('#results');
 
-            // synchronize all Elements of allSentence with DOM table rows (tr) 
+            // format the sentiment value
+            const sent_format = d3.format(".5f")
+
+            // synchronize all Elements of allSentence with DOM table rows (tr)
             // of class `.row` and generate new two new table data (td) fields
             // containing the sentence and an SVG element for the bar chart
             const allRows = resDom.selectAll('.row').data(allSentences)
                 .join('tr')
                 .attr('class', 'row')
-                .html(x => `<td>${x.sentence}</td><td><svg width=100 height=15><rect class="bar"></svg></td><td class='delBtn'>X</td>`)
+                .html(x => `<td class='delBtn'>X</td><td>${x.sentence}</td>
+<td><svg width=100 height=15><rect class="bg_bar" x=1 y=1 width=98 height=13 /><rect class="bar"></svg></td>
+<td>${sent_format(x.sentiment)}</td>`)
 
 
             // use a simple scale function -- can be replace by d3.scale later
             const scale = x => { return x * 50 }
 
-            // update the bar in the bar chart. 
+            // update the bar in the bar chart.
             // rectangles have to drawn from left to right
             // no negative width
             allRows.select('.bar')
